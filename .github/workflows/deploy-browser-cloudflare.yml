@@ -1,0 +1,59 @@
+name: Deploy Browser to Cloudflare Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Cloudflare Pages branch to deploy to (the project's production branch, usually main, goes live)
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-browser-cloudflare
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Browser (WASM)
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build-browser.yml
+    with:
+      source_sha: ${{ github.sha }}
+      action_run_id: ${{ github.run_id }}
+
+  deploy:
+    name: Deploy to Cloudflare Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout headers file
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/cloudflare
+          persist-credentials: false
+
+      - name: Download Browser package
+        uses: actions/download-artifact@v8
+        with:
+          name: OpenUtauMobile-browser-wasm
+          path: package
+
+      - name: Unpack site and add headers
+        run: |
+          mkdir site
+          tar -xzf package/OpenUtauMobile-browser-wasm.tar.gz -C site
+          cp .github/cloudflare/_headers site/_headers
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ inputs.branch }}

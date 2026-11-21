@@ -1,0 +1,6 @@
+# Cloudflare Pages custom headers (also read by Netlify).
+# Required for the multithreaded .NET WebAssembly runtime: the page must be
+# cross-origin isolated so SharedArrayBuffer is available.
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
