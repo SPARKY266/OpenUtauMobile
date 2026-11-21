@@ -1,0 +1,52 @@
+name: Deploy Browser to GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-browser-github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Browser (WASM)
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build-browser.yml
+    with:
+      source_sha: ${{ github.sha }}
+      action_run_id: ${{ github.run_id }}
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download Browser package
+        uses: actions/download-artifact@v8
+        with:
+          name: OpenUtauMobile-browser-wasm
+          path: package
+
+      - name: Unpack site
+        run: |
+          mkdir site
+          tar -xzf package/OpenUtauMobile-browser-wasm.tar.gz -C site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
