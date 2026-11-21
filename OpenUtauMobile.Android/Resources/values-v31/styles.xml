@@ -16,9 +16,9 @@
         <!-- 设置启动画面背景颜色 -->
         <item name="android:windowSplashScreenBackground">@color/splash_background</item>
         <!-- 设置动画资源 -->
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/openutau_splash_anim</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
         <!-- 设置动画持续时间为 1500ms -->
-        <item name="android:windowSplashScreenAnimationDuration">1500</item>
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
         <item name="postSplashScreenTheme">@style/MyTheme.Main</item>
     </style>
     <style name="MyTheme.Main"

@@ -28,7 +28,7 @@ internal static partial class BrowserAudioInterop
     {
         try
         {
-            await JSHost.ImportAsync(ModuleName, "/audio-output.js");
+            await JSHost.ImportAsync(ModuleName, "../audio-output.js");
             SampleRate = await Initialize(JSHost.DotnetInstance);
             CanSelectDevice = CanSelectOutput();
         }
